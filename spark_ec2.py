@@ -51,7 +51,7 @@ else:
     raw_input = input
     xrange = range
 
-SPARK_EC2_VERSION = "2.0.0"
+SPARK_EC2_VERSION = "2.1.0"
 SPARK_EC2_DIR = os.path.dirname(os.path.realpath(__file__))
 
 VALID_SPARK_VERSIONS = set([
@@ -605,6 +605,7 @@ def launch_cluster(conn, opts, cluster_name):
     print("Launching instances...")
 
     try:
+        print(opts.ami)
         image = conn.get_all_images(image_ids=[opts.ami])[0]
     except:
         print("Could not find AMI " + opts.ami, file=stderr)
@@ -613,6 +614,14 @@ def launch_cluster(conn, opts, cluster_name):
     # Create block device mapping so that we can add EBS volumes if asked to.
     # The first drive is attached as /dev/sds, 2nd as /dev/sdt, ... /dev/sdz
     block_map = BlockDeviceMapping()
+    # Increase the root volume
+    device = EBSBlockDeviceType()
+    device.size = 30
+    device.volume_type = opts.ebs_vol_type
+    device.delete_on_termination = True
+    block_map['/dev/xvda1'] = device
+
+    # /dev/xvda1
     if opts.ebs_vol_size > 0:
         for i in range(opts.ebs_vol_num):
             device = EBSBlockDeviceType()
