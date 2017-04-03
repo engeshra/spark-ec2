@@ -1208,7 +1208,7 @@ def ssh_args(opts):
 
 
 def ssh_command(opts):
-    return ['ssh'] + ssh_args(opts)
+    return ['sudo ssh'] + ssh_args(opts)
 
 
 # Run a command on a host through ssh, retrying up to five times
