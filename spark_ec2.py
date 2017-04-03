@@ -626,7 +626,7 @@ def launch_cluster(conn, opts, cluster_name):
     device.size = 30
     device.volume_type = opts.ebs_vol_type
     device.delete_on_termination = True
-    block_map['/dev/sda1'] = device
+    block_map['/dev/xvda'] = device
     # /dev/xvda1
     if opts.ebs_vol_size > 0:
         for i in range(opts.ebs_vol_num):
@@ -1208,7 +1208,7 @@ def ssh_args(opts):
 
 
 def ssh_command(opts):
-    return ['sudo ssh'] + ssh_args(opts)
+    return ['ssh'] + ssh_args(opts)
 
 
 # Run a command on a host through ssh, retrying up to five times
