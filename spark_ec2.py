@@ -490,8 +490,10 @@ def get_spark_ami(opts):
 
     ami_path = "%s/%s/%s" % (ami_prefix, opts.region, instance_type)
     reader = codecs.getreader("ascii")
+    print(ami_path)
     try:
         ami = reader(urlopen(ami_path)).read().strip()
+        print(ami)
     except:
         print("Could not resolve AMI at: " + ami_path, file=stderr)
         sys.exit(1)
@@ -607,20 +609,24 @@ def launch_cluster(conn, opts, cluster_name):
     try:
         print(opts.ami)
         image = conn.get_all_images(image_ids=[opts.ami])[0]
+        print(image.root_device_name)
+        print(image.block_device_mapping)
+        # for k,v in vars(image).iteritems():
+        #     print "{0}:{1}".format(k,v)
     except:
         print("Could not find AMI " + opts.ami, file=stderr)
         sys.exit(1)
 
     # Create block device mapping so that we can add EBS volumes if asked to.
     # The first drive is attached as /dev/sds, 2nd as /dev/sdt, ... /dev/sdz
+
     block_map = BlockDeviceMapping()
     # Increase the root volume
     device = EBSBlockDeviceType()
     device.size = 30
     device.volume_type = opts.ebs_vol_type
     device.delete_on_termination = True
-    block_map['/dev/xvda1'] = device
-
+    block_map['/dev/sda1'] = device
     # /dev/xvda1
     if opts.ebs_vol_size > 0:
         for i in range(opts.ebs_vol_num):
@@ -873,7 +879,7 @@ def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
     ssh(
         host=master,
         opts=opts,
-        command="rm -rf spark-ec2"
+        command="sudo rm -rf spark-ec2"
         + " && "
         + "git clone {r} -b {b} spark-ec2".format(r=opts.spark_ec2_git_repo,
                                                   b=opts.spark_ec2_git_branch)
@@ -1159,7 +1165,7 @@ def deploy_files(conn, root_dir, opts, master_nodes, slave_nodes, modules):
                             dest.close()
     # rsync the whole directory over to the master machine
     command = [
-        'rsync', '-rv',
+        'sudo rsync', '-rv',
         '-e', stringify_command(ssh_command(opts)),
         "%s/" % tmp_dir,
         "%s@%s:/" % (opts.user, active_master)
@@ -1178,7 +1184,7 @@ def deploy_files(conn, root_dir, opts, master_nodes, slave_nodes, modules):
 def deploy_user_files(root_dir, opts, master_nodes):
     active_master = get_dns_name(master_nodes[0], opts.private_ips)
     command = [
-        'rsync', '-rv',
+        'sudo rsync', '-rv',
         '-e', stringify_command(ssh_command(opts)),
         "%s" % root_dir,
         "%s@%s:/" % (opts.user, active_master)
@@ -1202,7 +1208,7 @@ def ssh_args(opts):
 
 
 def ssh_command(opts):
-    return ['ssh'] + ssh_args(opts)
+    return ['sudo ssh'] + ssh_args(opts)
 
 
 # Run a command on a host through ssh, retrying up to five times
