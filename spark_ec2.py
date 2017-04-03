@@ -879,7 +879,7 @@ def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
     ssh(
         host=master,
         opts=opts,
-        command="sudo rm -rf spark-ec2"
+        command="rm -rf spark-ec2"
         + " && "
         + "git clone {r} -b {b} spark-ec2".format(r=opts.spark_ec2_git_repo,
                                                   b=opts.spark_ec2_git_branch)
@@ -1208,7 +1208,7 @@ def ssh_args(opts):
 
 
 def ssh_command(opts):
-    return ['sudo ssh'] + ssh_args(opts)
+    return ['ssh'] + ssh_args(opts)
 
 
 # Run a command on a host through ssh, retrying up to five times
