@@ -1165,7 +1165,7 @@ def deploy_files(conn, root_dir, opts, master_nodes, slave_nodes, modules):
                             dest.close()
     # rsync the whole directory over to the master machine
     command = [
-        'sudo rsync', '-rv',
+        'rsync', '-rv',
         '-e', stringify_command(ssh_command(opts)),
         "%s/" % tmp_dir,
         "%s@%s:/" % (opts.user, active_master)
@@ -1184,7 +1184,7 @@ def deploy_files(conn, root_dir, opts, master_nodes, slave_nodes, modules):
 def deploy_user_files(root_dir, opts, master_nodes):
     active_master = get_dns_name(master_nodes[0], opts.private_ips)
     command = [
-        'sudo rsync', '-rv',
+        'rsync', '-rv',
         '-e', stringify_command(ssh_command(opts)),
         "%s" % root_dir,
         "%s@%s:/" % (opts.user, active_master)
